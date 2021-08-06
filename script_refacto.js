@@ -18,25 +18,39 @@ var data = [
     "period": "2021_28"
   }
 ];
-function generateGraph() {
-  var labels = [];
-  var graphValues = [];
-  var n=0;
-  for (var i = 0; i < data.length; i++) {
+function addTotal(data){
+  let dataWithTotal=[];
+  for (let i = 0; i < data.length; i++) {
+    let temp = data[i];
     total = 0;
-    for (var key in data[i]) {
-      if(key !== "period") {
+    for (let key in data[i]) {
+      if (key !== "period") {
         total += data[i][key];
-      }else{
-        labels.push(data[i][key]);
       }
     }
-    data[i].total = total / 3;
+    temp.total = total / 3;
+    dataWithTotal.push(temp);
   }
-  for (var keys in data[0]) {
-    if(keys !== "period") {
-      var temp = {
-        label: keys, 
+  return dataWithTotal;
+}
+
+function getLabels(dataWithTotal){
+  let labels = [];
+
+  for (let i = 0; i < dataWithTotal.length; i++) {
+    labels.push(dataWithTotal[i]['period']);
+  }
+  return labels;
+}
+
+function getGraphValues(dataWithTotal){
+  let graphValues = [];
+  let keys = Object.keys(dataWithTotal[0]);
+
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i] !== "period") {
+      let temp = {
+        label: keys[i],
         data: [],
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
@@ -49,20 +63,37 @@ function generateGraph() {
           'rgba(54, 162, 235, 1)',
           'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)'
-        ], 
+        ],
       };
-      for (var j = 0; j < data.length; j++) {
-        temp.data.push(data[j][keys])
+
+      for (let n = 0; n < dataWithTotal.length; n++) {
+        console.log(dataWithTotal[n][keys[i]]);
+
+        temp.data.push(dataWithTotal[n][keys[i]])
       }
+
       graphValues.push(temp);
     }
   }
-  var myChart = new Chart(document.getElementById('myChart').getContext('2d'), {
+    return graphValues;
+}
+
+function generateGraph() {
+  let dataWithTotal = addTotal(data);
+  let labels = getLabels(dataWithTotal);
+  let graphValues = getGraphValues(dataWithTotal);
+  graphFunction('myChart',labels,graphValues);
+
+}
+
+function graphFunction(id,graphLabels,graphDatasets){
+  let myChart = new Chart(document.getElementById(id).getContext('2d'), {
     type: 'line',
     data: {
-      labels: labels,
-      datasets: graphValues
+      labels: graphLabels,
+      datasets: graphDatasets
     }
   });
 }
+
 generateGraph();
